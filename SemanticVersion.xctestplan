@@ -1,0 +1,34 @@
+{
+  "configurations" : [
+    {
+      "id" : "506CB597-8563-4B61-839C-548F9F97F5AF",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "SemanticVersion",
+          "name" : "SemanticVersion"
+        }
+      ]
+    },
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SemanticVersionTests",
+        "name" : "SemanticVersionTests"
+      }
+    }
+  ],
+  "version" : 1
+}
