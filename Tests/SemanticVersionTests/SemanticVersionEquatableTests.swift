@@ -51,9 +51,69 @@ final class SemanticVersionEquatableTests: XCTestCase {
         
     }
     
-    func testInEqualMinor() {
+    func testInEqualMinorKnown() {
         
         XCTAssertNotEqual(SemVer("1.100.3"), SemVer("1.101.3"))
+        
+    }
+    
+    func testInEqualMajor() {
+        
+        for _ in 0..<1_000 {
+            
+            let baseVersion = SemVer.plausible()
+            
+            if baseVersion.major == UInt.max { continue }
+            
+            let updatedVersion = SemVer(major: baseVersion.major + 1,
+                                        minor: baseVersion.minor,
+                                        patch: baseVersion.patch,
+                                        prerelease: baseVersion.prerelease,
+                                        buildMetadata: baseVersion.buildMetadata)
+            
+            XCTAssertNotEqual(updatedVersion, baseVersion)
+            
+        }
+        
+    }
+    
+    func testInEqualMinor() {
+        
+        for _ in 0..<1_000 {
+            
+            let baseVersion = SemVer.plausible()
+            
+            if baseVersion.minor == UInt.max { continue }
+            
+            let updatedVersion = SemVer(major: baseVersion.major,
+                                        minor: baseVersion.minor + 1,
+                                        patch: baseVersion.patch,
+                                        prerelease: baseVersion.prerelease,
+                                        buildMetadata: baseVersion.buildMetadata)
+            
+            XCTAssertNotEqual(updatedVersion, baseVersion)
+            
+        }
+        
+    }
+    
+    func testInEqualPatch() {
+        
+        for _ in 0..<1_000 {
+            
+            let baseVersion = SemVer.plausible()
+            
+            if baseVersion.patch == UInt.max { continue }
+            
+            let updatedVersion = SemVer(major: baseVersion.major,
+                                        minor: baseVersion.minor,
+                                        patch: baseVersion.patch + 1,
+                                        prerelease: baseVersion.prerelease,
+                                        buildMetadata: baseVersion.buildMetadata)
+            
+            XCTAssertNotEqual(updatedVersion, baseVersion)
+            
+        }
         
     }
     
