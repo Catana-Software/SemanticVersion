@@ -95,7 +95,7 @@ let fourteenFourOne = SemVer("14.4.1")!
 let fourteenFourTwo = SemVer("14.4.2")!
 
 // fourteenFourOne < fourteenFourTwo ✅
-// fourteenFourTwo > fourteenFourOne ❌
+// fourteenFourTwo > fourteenFourOne ✅
 ```
 
 For more detailed usage examples and how this implementation handles prerelease and build meta data see the [unit tests](https://github.com/rase-rocks/SemanticVersion/blob/main/Tests/SemanticVersionTests/SemanticVersionComparableTests.swift).
