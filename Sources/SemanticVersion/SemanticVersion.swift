@@ -42,3 +42,5 @@ public struct SemanticVersion {
     }
     
 }
+
+extension SemanticVersion: Sendable {}
