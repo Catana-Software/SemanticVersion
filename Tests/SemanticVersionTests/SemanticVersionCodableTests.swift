@@ -1,5 +1,5 @@
-import XCTest
 import SemanticVersion
+import XCTest
 
 final class SemanticVersionCodableTests: XCTestCase {
     
