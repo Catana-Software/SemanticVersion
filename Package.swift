@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -11,22 +11,16 @@ let package = Package(
     products: [
         .library(
             name: "SemanticVersion",
-            targets: ["SemanticVersion"]),
+            targets: ["SemanticVersion"]
+        )
     ],
     targets: [
         .target(
-            name: "SemanticVersion"),
+            name: "SemanticVersion"
+        ),
         .testTarget(
             name: "SemanticVersionTests",
-            dependencies: ["SemanticVersion"]),
+            dependencies: ["SemanticVersion"]
+        )
     ]
 )
-
-let swiftSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("BareSlashRegexLiterals"),
-    .enableUpcomingFeature("StrictConcurrency")
-]
-for target in package.targets {
-    target.swiftSettings = target.swiftSettings ?? []
-    target.swiftSettings?.append(contentsOf: swiftSettings)
-}
