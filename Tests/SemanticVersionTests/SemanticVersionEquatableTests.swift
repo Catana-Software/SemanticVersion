@@ -43,10 +43,14 @@ final class SemanticVersionEquatableTests: XCTestCase {
         ].map { (SemVer($0)!, SemVer($1)!) }
         
         for pair in inEqualVersionPairs {
-            
+
             XCTAssertNotEqual(pair.0, pair.1)
-            XCTAssertNotEqual(pair.0.hashValue, pair.1.hashValue)
-            
+
+            // Distinct values are distinct `Set` members. Unlike asserting on
+            // `hashValue` inequality, this holds for any lawful `Hashable`
+            // conformance, which permits unequal values to collide.
+            XCTAssertEqual(Set([pair.0, pair.1]).count, 2)
+
         }
         
     }

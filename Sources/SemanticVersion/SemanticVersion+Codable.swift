@@ -1,5 +1,3 @@
-import Foundation
-
 /// Extends ``SemanticVersion`` with `Codable` conformance
 extension SemanticVersion: Codable {
     

@@ -23,7 +23,8 @@ let package = Package(
 )
 
 let swiftSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("BareSlashRegexLiterals")
+    .enableUpcomingFeature("BareSlashRegexLiterals"),
+    .enableUpcomingFeature("StrictConcurrency")
 ]
 for target in package.targets {
     target.swiftSettings = target.swiftSettings ?? []

@@ -30,6 +30,10 @@ final class SemanticVersionCodableTests: XCTestCase {
         "1.1.1+h*23", "1.1.1-(1)", "1.1.1-1_000_000",
         "1.2.3-naïve", "1.2.3-蛤.foo", "1.2.3+😄.foo",
         "1.1.1-alpha.0+a#1", "1.1.1+ ", "1.1.1+hello world",
+        // non-ASCII digits
+        "1.0.0-5\u{0663}", "1.0.0-\u{0663}a", "1.0.0-5\u{FF13}", "1\u{0663}.0.0",
+        // version numbers beyond UInt.max
+        "18446744073709551616.0.0", "1.18446744073709551616.0", "1.0.18446744073709551616",
     ]
     
     func testCodingInvalidStringThrows() throws {

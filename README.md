@@ -37,7 +37,7 @@ let version = SemVer("14.4.1")
 // version?.patch == 1
 ```
 
-The initialiser is failable and returns `nil` for any string that is not a valid Semantic Versioning string. It also returns `nil` for inputs longer than 256 characters, or whose major, minor, or patch numbers exceed `UInt.max`.
+The initialiser is failable and returns `nil` for any string that is not a valid Semantic Versioning string. It also returns `nil` for inputs longer than 256 UTF-8 bytes, or whose major, minor, or patch numbers exceed `UInt.max`.
 
 ### Codable conformance
 

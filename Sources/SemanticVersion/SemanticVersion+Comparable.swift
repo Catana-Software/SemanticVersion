@@ -1,5 +1,3 @@
-import Foundation
-
 /// Extends ``SemanticVersion`` with `Comparable` conformance
 extension SemanticVersion: Comparable {
     
@@ -37,8 +35,12 @@ extension SemanticVersion: Comparable {
                     // overflow; comparing by digit count avoids that. As leading
                     // zeroes are disallowed, the identifier with more digits is
                     // always the larger number, and identifiers with an equal
-                    // number of digits compare correctly lexically.
-                    return lpr.count == rpr.count ? lpr < rpr : lpr.count < rpr.count
+                    // number of digits compare correctly lexically. Identifiers
+                    // are validated ASCII, so `utf8.count` is the digit count
+                    // and avoids a grapheme walk.
+                    return lpr.utf8.count == rpr.utf8.count
+                        ? lpr < rpr
+                        : lpr.utf8.count < rpr.utf8.count
 
                 case (false, false):
                     return lpr < rpr
@@ -53,19 +55,6 @@ extension SemanticVersion: Comparable {
 
             }
 
-    }
-
-    /// Determine whether a pre-release identifier is a numeric identifier.
-    ///
-    /// A numeric identifier comprises only ASCII digits. Identifiers produced by
-    /// the parser never include leading zeroes, so this also implies that a
-    /// longer numeric identifier represents a larger value.
-    ///
-    /// - Parameter identifier: A single pre-release identifier.
-    ///
-    /// - Returns: A truthy value if every character is an ASCII digit.
-    private static func isNumericIdentifier(_ identifier: String) -> Bool {
-        return !identifier.isEmpty && identifier.allSatisfy { $0.isASCII && $0.isNumber }
     }
 
 }

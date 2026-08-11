@@ -1,5 +1,3 @@
-import Foundation
-
 public typealias SemVer = SemanticVersion
 
 /// A version conforming to [Semantic Versioning 2.0.0](http://semver.org).
@@ -35,6 +33,12 @@ public struct SemanticVersion {
     ///   - patch: The PATCH version.
     ///   - prerelease: The pre-release identifiers.
     ///   - buildMetadata: The build metadata identifiers. Ignored for equality, hashing and ordering.
+    ///
+    /// - Precondition: Every element of `prerelease` is a non-empty string of ASCII alphanumerics
+    ///   and hyphens, without leading zeroes if it comprises only digits.
+    ///
+    /// - Precondition: Every element of `buildMetadata` is a non-empty string of ASCII
+    ///   alphanumerics and hyphens.
     public init(
         major: UInt,
         minor: UInt,
@@ -42,15 +46,83 @@ public struct SemanticVersion {
         prerelease: [String],
         buildMetadata: [String]
     ) {
-        
+
+        precondition(
+            prerelease.allSatisfy(SemanticVersion.isValidPrereleaseIdentifier),
+            "A pre-release identifier must be a non-empty string of ASCII alphanumerics and " +
+            "hyphens, without leading zeroes if it comprises only digits"
+        )
+
+        precondition(
+            buildMetadata.allSatisfy(SemanticVersion.isValidBuildMetadataIdentifier),
+            "A build metadata identifier must be a non-empty string of ASCII alphanumerics and " +
+            "hyphens"
+        )
+
         self.major = major
         self.minor = minor
         self.patch = patch
         self.prerelease = prerelease
         self.buildMetadata = buildMetadata
-        
+
     }
-    
+
+    /// Determine whether a string is a valid pre-release identifier.
+    ///
+    /// A valid pre-release identifier is a non-empty string of ASCII alphanumerics and hyphens
+    /// that, when it comprises only digits, has no leading zeroes.
+    ///
+    /// - Parameter identifier: A single pre-release identifier.
+    ///
+    /// - Returns: A truthy value if the identifier is valid.
+    static func isValidPrereleaseIdentifier(_ identifier: String) -> Bool {
+
+        guard isValidBuildMetadataIdentifier(identifier) else { return false }
+
+        let hasLeadingZero = identifier.utf8.count > 1 &&
+        identifier.utf8.first == UInt8(ascii: "0")
+
+        return !hasLeadingZero || !isNumericIdentifier(identifier)
+
+    }
+
+    /// Determine whether a string is a valid build metadata identifier.
+    ///
+    /// A valid build metadata identifier is a non-empty string of ASCII alphanumerics and hyphens.
+    ///
+    /// - Parameter identifier: A single build metadata identifier.
+    ///
+    /// - Returns: A truthy value if the identifier is valid.
+    static func isValidBuildMetadataIdentifier(_ identifier: String) -> Bool {
+
+        return !identifier.isEmpty && identifier.utf8.allSatisfy { byte in
+
+            return (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9")) ||
+            (byte >= UInt8(ascii: "A") && byte <= UInt8(ascii: "Z")) ||
+            (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "z")) ||
+            byte == UInt8(ascii: "-")
+
+        }
+
+    }
+
+    /// Determine whether an identifier is a numeric identifier.
+    ///
+    /// A numeric identifier comprises only ASCII digits. Identifiers are checked on construction
+    /// never to include leading zeroes, so this also implies that a longer numeric identifier
+    /// represents a larger value. The byte-wise check is deliberate: `Character.isNumber` matches
+    /// non-ASCII digits, which the Semantic Versioning grammar excludes.
+    ///
+    /// - Parameter identifier: A single pre-release identifier.
+    ///
+    /// - Returns: A truthy value if every character is an ASCII digit.
+    static func isNumericIdentifier(_ identifier: String) -> Bool {
+
+        return !identifier.isEmpty &&
+        identifier.utf8.allSatisfy { $0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9") }
+
+    }
+
 }
 
 extension SemanticVersion: Sendable {}

@@ -92,6 +92,29 @@ final class SemanticVersionComparableTests: XCTestCase {
 
     }
 
+    func testSpecificationPrecedenceExample() {
+
+        // The worked precedence example from item 11 of the specification.
+        let orderedVersionStrings = [
+            "1.0.0-alpha",
+            "1.0.0-alpha.1",
+            "1.0.0-alpha.beta",
+            "1.0.0-beta",
+            "1.0.0-beta.2",
+            "1.0.0-beta.11",
+            "1.0.0-rc.1",
+            "1.0.0"
+        ]
+
+        let orderedVersions = orderedVersionStrings
+            .map { SemVer($0)! }
+
+        for (lower, higher) in zip(orderedVersions, orderedVersions.dropFirst()) {
+            XCTAssertLessThan(lower, higher)
+        }
+
+    }
+
     func testCompareLargeNumericPrerelease() {
 
         // Numeric identifiers that exceed UInt.max must still compare numerically.
