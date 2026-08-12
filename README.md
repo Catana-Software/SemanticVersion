@@ -108,6 +108,42 @@ For more detailed usage examples and how this implementation handles prerelease 
 
 **Note** In accordance with the specification, build metadata is ignored for equality, hashing and ordering. This means two versions that differ only by build metadata (for example `1.0.0+a` and `1.0.0+b`) compare as equal, even though their string representations — and therefore their encoded forms, differ. If you need to distinguish them, compare their `description` values directly.
 
+### Constructing from individual components
+
+A `SemanticVersion` can also be built from its parts rather than parsed from a string. Identifiers must be valid: non-empty strings of ASCII alphanumerics and hyphens, and, for pre-release identifiers, without leading zeroes if they comprise only digits. The memberwise initialiser treats an invalid identifier as a programming error and traps, in release builds as well as debug:
+
+```swift
+// ✅ valid
+let version = SemVer(
+    major: 1, minor: 2, patch: 3,
+    prerelease: ["alpha", "1"],
+    buildMetadata: ["exp", "sha", "5114f85"]
+)
+
+// ❌ traps: "alpha.1" is one identifier containing a separator
+let invalid = SemVer(
+    major: 1, minor: 2, patch: 3,
+    prerelease: ["alpha.1"],
+    buildMetadata: []
+)
+```
+
+When the identifiers do not come from your own code, such as a decoded payload, a query parameter, or a user supplied value, use `validated(major:minor:patch:prerelease:buildMetadata:)`, which returns `nil` rather than trapping:
+
+```swift
+guard let version = SemVer.validated(
+    major: payload.major, minor: payload.minor, patch: payload.patch,
+    prerelease: payload.prerelease,
+    buildMetadata: payload.buildMetadata
+) else {
+    throw MyError.invalidVersion
+}
+```
+
+Individual identifiers can be checked ahead of time with `SemanticVersion.isValidPrereleaseIdentifier(_:)` and `SemanticVersion.isValidBuildMetadataIdentifier(_:)`.
+
+**Note** This care is only needed when building from components. Parsing a whole version string with `SemVer(_:)` is always failable and never traps, so decoding untrusted JSON is safe: an invalid version string surfaces as a `DecodingError`.
+
 ## Contributing
 
 A guide to contributing to this project can be found at [CONTRIBUTING.md](https://github.com/rase-rocks/SemanticVersion/blob/main/CONTRIBUTING.md).

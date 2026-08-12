@@ -48,13 +48,64 @@ final class DocumentationExampleTests: XCTestCase {
     }
     
     func testComparison() {
-        
+
         let fourteenFourOne = SemVer("14.4.1")!
         let fourteenFourTwo = SemVer("14.4.2")!
-        
+
         XCTAssertTrue(fourteenFourOne < fourteenFourTwo)
         XCTAssertTrue(fourteenFourTwo > fourteenFourOne)
-        
+
     }
-    
+
+    func testComponentConstruction() {
+
+        let version = SemVer(
+            major: 1, minor: 2, patch: 3,
+            prerelease: ["alpha", "1"],
+            buildMetadata: ["exp", "sha", "5114f85"]
+        )
+
+        XCTAssertEqual(version.description, "1.2.3-alpha.1+exp.sha.5114f85")
+
+    }
+
+    func testValidatedComponentConstruction() {
+
+        struct Payload: Codable {
+
+            let major: UInt
+            let minor: UInt
+            let patch: UInt
+            let prerelease: [String]
+            let buildMetadata: [String]
+
+        }
+
+        enum MyError: Error { case invalidVersion }
+
+        let payload = Payload(
+            major: 1, minor: 2, patch: 3,
+            prerelease: ["alpha.1"],
+            buildMetadata: []
+        )
+
+        // The README's guard-else pattern: invalid components yield nil, not a trap.
+        func makeVersion() throws -> SemVer {
+
+            guard let version = SemVer.validated(
+                major: payload.major, minor: payload.minor, patch: payload.patch,
+                prerelease: payload.prerelease,
+                buildMetadata: payload.buildMetadata
+            ) else {
+                throw MyError.invalidVersion
+            }
+
+            return version
+
+        }
+
+        XCTAssertThrowsError(try makeVersion())
+
+    }
+
 }

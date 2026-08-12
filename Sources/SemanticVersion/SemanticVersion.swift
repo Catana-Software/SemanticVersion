@@ -27,6 +27,10 @@ public struct SemanticVersion {
     
     /// Initialise a ``SemanticVersion`` from its individual components.
     ///
+    /// Invalid identifiers are treated as a programming error and trap. For identifiers that are
+    /// not known to be valid, such as those decoded from a payload or supplied by a user, use
+    /// ``validated(major:minor:patch:prerelease:buildMetadata:)`` instead, which returns a `nil`.
+    ///
     /// - Parameters:
     ///   - major: The MAJOR version.
     ///   - minor: The MINOR version.
@@ -50,13 +54,16 @@ public struct SemanticVersion {
         precondition(
             prerelease.allSatisfy(SemanticVersion.isValidPrereleaseIdentifier),
             "A pre-release identifier must be a non-empty string of ASCII alphanumerics and " +
-            "hyphens, without leading zeroes if it comprises only digits"
+            "hyphens, without leading zeroes if it comprises only digits. Use " +
+            "SemanticVersion.validated(major:minor:patch:prerelease:buildMetadata:) for " +
+            "identifiers that are not known to be valid"
         )
 
         precondition(
             buildMetadata.allSatisfy(SemanticVersion.isValidBuildMetadataIdentifier),
             "A build metadata identifier must be a non-empty string of ASCII alphanumerics and " +
-            "hyphens"
+            "hyphens. Use SemanticVersion.validated(major:minor:patch:prerelease:buildMetadata:) " +
+            "for identifiers that are not known to be valid"
         )
 
         self.major = major
@@ -67,15 +74,59 @@ public struct SemanticVersion {
 
     }
 
+    /// Initialise a ``SemanticVersion`` from components that are not known to be valid.
+    ///
+    /// Prefer this to ``init(major:minor:patch:prerelease:buildMetadata:)`` whenever the
+    /// identifiers originate outside your own code, such as a decoded payload, a query parameter,
+    /// or a user supplied value. The memberwise initialiser treats an invalid identifier as a
+    /// programming error and traps, including in release builds; this returns a `nil` instead.
+    ///
+    /// Parsing a whole version string with ``init(_:)`` needs no such care, as that initialiser
+    /// is failable and validates the entire string.
+    ///
+    /// - Parameters:
+    ///   - major: The MAJOR version.
+    ///   - minor: The MINOR version.
+    ///   - patch: The PATCH version.
+    ///   - prerelease: The pre-release identifiers.
+    ///   - buildMetadata: The build metadata identifiers. Ignored for equality, hashing and ordering.
+    ///
+    /// - Returns: A ``SemanticVersion``, or a `nil` if any identifier is invalid.
+    public static func validated(
+        major: UInt,
+        minor: UInt,
+        patch: UInt,
+        prerelease: [String],
+        buildMetadata: [String]
+    ) -> SemanticVersion? {
+
+        guard
+            prerelease.allSatisfy(isValidPrereleaseIdentifier),
+            buildMetadata.allSatisfy(isValidBuildMetadataIdentifier)
+        else { return nil }
+
+        return SemanticVersion(
+            major: major,
+            minor: minor,
+            patch: patch,
+            prerelease: prerelease,
+            buildMetadata: buildMetadata
+        )
+
+    }
+
     /// Determine whether a string is a valid pre-release identifier.
     ///
     /// A valid pre-release identifier is a non-empty string of ASCII alphanumerics and hyphens
     /// that, when it comprises only digits, has no leading zeroes.
     ///
+    /// Use this to check identifiers before passing them to
+    /// ``init(major:minor:patch:prerelease:buildMetadata:)``.
+    ///
     /// - Parameter identifier: A single pre-release identifier.
     ///
     /// - Returns: A truthy value if the identifier is valid.
-    static func isValidPrereleaseIdentifier(_ identifier: String) -> Bool {
+    public static func isValidPrereleaseIdentifier(_ identifier: String) -> Bool {
 
         guard isValidBuildMetadataIdentifier(identifier) else { return false }
 
@@ -89,11 +140,15 @@ public struct SemanticVersion {
     /// Determine whether a string is a valid build metadata identifier.
     ///
     /// A valid build metadata identifier is a non-empty string of ASCII alphanumerics and hyphens.
+    /// Unlike a pre-release identifier, it may carry leading zeroes.
+    ///
+    /// Use this to check identifiers before passing them to
+    /// ``init(major:minor:patch:prerelease:buildMetadata:)``.
     ///
     /// - Parameter identifier: A single build metadata identifier.
     ///
     /// - Returns: A truthy value if the identifier is valid.
-    static func isValidBuildMetadataIdentifier(_ identifier: String) -> Bool {
+    public static func isValidBuildMetadataIdentifier(_ identifier: String) -> Bool {
 
         return !identifier.isEmpty && identifier.utf8.allSatisfy { byte in
 
